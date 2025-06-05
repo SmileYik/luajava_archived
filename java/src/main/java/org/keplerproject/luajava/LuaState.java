@@ -373,9 +373,11 @@ public class LuaState {
 
     private synchronized native void _LunRef(CPtr ptr, int t, int ref);
 
-    private synchronized native int _LgetN(CPtr ptr, int t);
+    // luaL_getn 方法在 LuaJIT 2.1.1748459687 中不存在
+    // private synchronized native int _LgetN(CPtr ptr, int t);
 
-    private synchronized native void _LsetN(CPtr ptr, int t, int n);
+    // luaL_setn 方法在 LuaJIT 2.1.1748459687 中不存在
+    // private synchronized native void _LsetN(CPtr ptr, int t, int n);
 
     private synchronized native int _LloadFile(CPtr ptr, String fileName);
 
@@ -760,13 +762,15 @@ public class LuaState {
         _LunRef(luaState, t, ref);
     }
 
-    public int LgetN(int t) {
-        return _LgetN(luaState, t);
-    }
+    // luaL_getn 方法在 LuaJIT 2.1.1748459687 中不存在
+    // public int LgetN(int t) {
+    //     return _LgetN(luaState, t);
+    // }
 
-    public void LsetN(int t, int n) {
-        _LsetN(luaState, t, n);
-    }
+    // luaL_setn 方法在 LuaJIT 2.1.1748459687 中不存在
+    // public void LsetN(int t, int n) {
+    //     _LsetN(luaState, t, n);
+    // }
 
     public int LloadFile(String fileName) {
         return _LloadFile(luaState, fileName);

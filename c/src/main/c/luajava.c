@@ -3740,13 +3740,14 @@ JNIEXPORT void JNICALL Java_org_keplerproject_luajava_LuaState__1LunRef
 *      Lua Exported Function
 ************************************************************************/
 
-JNIEXPORT jint JNICALL Java_org_keplerproject_luajava_LuaState__1LgetN
-  (JNIEnv * env , jobject jobj , jobject cptr , jint t)
-{
-   lua_State * L = getStateFromCPtr( env , cptr );
-
-   return ( jint ) luaL_getn( L , ( int ) t );
-}
+// luaL_getn 方法在 LuaJIT 2.1.1748459687 中不存在
+//JNIEXPORT jint JNICALL Java_org_keplerproject_luajava_LuaState__1LgetN
+//  (JNIEnv * env , jobject jobj , jobject cptr , jint t)
+//{
+//   lua_State * L = getStateFromCPtr( env , cptr );
+//
+//   return ( jint ) luaL_getn( L , ( int ) t );
+//}
 
 
 /************************************************************************
@@ -3754,13 +3755,14 @@ JNIEXPORT jint JNICALL Java_org_keplerproject_luajava_LuaState__1LgetN
 *      Lua Exported Function
 ************************************************************************/
 
-JNIEXPORT void JNICALL Java_org_keplerproject_luajava_LuaState__1LsetN
-  (JNIEnv * env , jobject jobj , jobject cptr , jint t , jint n)
-{
-   lua_State * L = getStateFromCPtr( env , cptr );
-
-   luaL_setn( L , ( int ) t , ( int ) n );
-}
+// luaL_setn 方法在 LuaJIT 2.1.1748459687 中不存在
+//JNIEXPORT void JNICALL Java_org_keplerproject_luajava_LuaState__1LsetN
+//  (JNIEnv * env , jobject jobj , jobject cptr , jint t , jint n)
+//{
+//   lua_State * L = getStateFromCPtr( env , cptr );
+//
+//   luaL_setn( L , ( int ) t , ( int ) n );
+//}
 
 
 /************************************************************************

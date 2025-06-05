@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'c'
 }
 
 group = 'org.keplerproject'
@@ -9,16 +9,37 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    compileOnly project(":java")
-}
+model {
+    components {
+        luajit(NativeLibrarySpec) {
+            sources {
+                c {
+                    exportedHeaders {
+                        srcDir '/usr/include/luajit-2.1/'
+                    }
+                }
+            }
+        }
 
-test {
-    useJUnitPlatform()
-}
+        luajava(NativeLibrarySpec) {
+            sources {
+                c {
+                    lib library: 'luajit', linkage: 'static'
+                    exportedHeaders {
+                        srcDir project(':java').layout.buildDirectory.dir("include")
+                        srcDir "${System.properties['java.home']}/include"
+                        srcDir "${System.properties['java.home']}/include/linux"
+                    }
+                    source {
+                        srcDir "src/main/c"
+                        include "**/*.c"
+                    }
+                }
+            }
 
-build {
-
+            binaries.withType(SharedLibraryBinarySpec) {
+                linker.args "-lluajit-5.1", "-L/usr/lib/"
+            }
+        }
+    }
 }
