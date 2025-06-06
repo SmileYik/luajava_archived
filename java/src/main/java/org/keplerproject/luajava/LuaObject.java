@@ -54,7 +54,7 @@ import java.util.StringTokenizer;
 public class LuaObject {
     protected Integer ref;
 
-    protected LuaState L;
+    protected final LuaState L;
 
     /**
      * Creates a reference to an object in the variable globalName
@@ -170,8 +170,7 @@ public class LuaObject {
     private void registerValue(int index) {
         synchronized (L) {
             L.pushValue(index);
-            int key = L.Lref(LuaState.LUA_REGISTRYINDEX.intValue());
-            ref = new Integer(key);
+            ref = L.Lref(LuaState.LUA_REGISTRYINDEX);
         }
     }
 
@@ -179,7 +178,7 @@ public class LuaObject {
         try {
             synchronized (L) {
                 if (L.getCPtrPeer() != 0)
-                    L.LunRef(LuaState.LUA_REGISTRYINDEX.intValue(), ref.intValue());
+                    L.LunRef(LuaState.LUA_REGISTRYINDEX, ref);
             }
         } catch (Exception e) {
             System.err.println("Unable to release object " + ref);
@@ -190,7 +189,7 @@ public class LuaObject {
      * Pushes the object represented by <code>this</code> into L's stack
      */
     public void push() {
-        L.rawGetI(LuaState.LUA_REGISTRYINDEX.intValue(), ref.intValue());
+        L.rawGetI(LuaState.LUA_REGISTRYINDEX, ref);
     }
 
     public boolean isNil() {
@@ -364,11 +363,11 @@ public class LuaObject {
                 } else
                     str = "";
 
-                if (err == LuaState.LUA_ERRRUN.intValue()) {
+                if (err == LuaState.LUA_ERRRUN) {
                     str = "Runtime error. " + str;
-                } else if (err == LuaState.LUA_ERRMEM.intValue()) {
+                } else if (err == LuaState.LUA_ERRMEM) {
                     str = "Memory allocation error. " + str;
-                } else if (err == LuaState.LUA_ERRERR.intValue()) {
+                } else if (err == LuaState.LUA_ERRERR) {
                     str = "Error while running the error handler function. " + str;
                 } else {
                     str = "Lua Error code " + err + ". " + str;
@@ -377,7 +376,7 @@ public class LuaObject {
                 throw new LuaException(str);
             }
 
-            if (nres == LuaState.LUA_MULTRET.intValue())
+            if (nres == LuaState.LUA_MULTRET)
                 nres = L.getTop() - top;
             if (L.getTop() - top < nres) {
                 throw new LuaException("Invalid Number of Results .");
@@ -445,7 +444,7 @@ public class LuaObject {
                 throw new LuaException("Invalid Object. Must be Table.");
 
             StringTokenizer st = new StringTokenizer(implem, ",");
-            Class[] interfaces = new Class[st.countTokens()];
+            Class<?>[] interfaces = new Class[st.countTokens()];
             for (int i = 0; st.hasMoreTokens(); i++)
                 interfaces[i] = Class.forName(st.nextToken());
 

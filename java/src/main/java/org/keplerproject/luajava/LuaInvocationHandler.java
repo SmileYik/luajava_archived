@@ -56,7 +56,7 @@ public class LuaInvocationHandler implements InvocationHandler {
                 return null;
             }
 
-            Class retType = method.getReturnType();
+            Class<?> retType = method.getReturnType();
             Object ret;
 
             // Checks if returned type is void. if it is returns null.
@@ -65,7 +65,7 @@ public class LuaInvocationHandler implements InvocationHandler {
                 ret = null;
             } else {
                 ret = func.call(args, 1)[0];
-                if (ret != null && ret instanceof Double) {
+                if (ret instanceof Double) {
                     ret = LuaState.convertLuaNumber((Double) ret, retType);
                 }
             }

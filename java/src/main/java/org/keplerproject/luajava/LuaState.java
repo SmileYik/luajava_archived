@@ -33,24 +33,24 @@ package org.keplerproject.luajava;
  * @author Thiago Ponte
  */
 public class LuaState {
-    final public static Integer LUA_GLOBALSINDEX = new Integer(-10002);
-    final public static Integer LUA_REGISTRYINDEX = new Integer(-10000);
-    final public static Integer LUA_TNONE = new Integer(-1);
-    final public static Integer LUA_TNIL = new Integer(0);
-    final public static Integer LUA_TBOOLEAN = new Integer(1);
-    final public static Integer LUA_TLIGHTUSERDATA = new Integer(2);
-    final public static Integer LUA_TNUMBER = new Integer(3);
-    final public static Integer LUA_TSTRING = new Integer(4);
-    final public static Integer LUA_TTABLE = new Integer(5);
-    final public static Integer LUA_TFUNCTION = new Integer(6);
-    final public static Integer LUA_TUSERDATA = new Integer(7);
-    final public static Integer LUA_TTHREAD = new Integer(8);
+    final public static int LUA_GLOBALSINDEX = -10002;
+    final public static int LUA_REGISTRYINDEX = -10000;
+    final public static int LUA_TNONE = -1;
+    final public static int LUA_TNIL = 0;
+    final public static int LUA_TBOOLEAN = 1;
+    final public static int LUA_TLIGHTUSERDATA = 2;
+    final public static int LUA_TNUMBER = 3;
+    final public static int LUA_TSTRING = 4;
+    final public static int LUA_TTABLE = 5;
+    final public static int LUA_TFUNCTION = 6;
+    final public static int LUA_TUSERDATA = 7;
+    final public static int LUA_TTHREAD = 8;
     /**
      * Specifies that an unspecified (multiple) number of return arguments
      * will be returned by a call.
      */
-    final public static Integer LUA_MULTRET = new Integer(-1);
-    final public static Integer LUA_YIELD = new Integer(1);
+    final public static int LUA_MULTRET = -1;
+    final public static int LUA_YIELD = 1;
 
     /*
      * error codes for `lua_load' and `lua_pcall'
@@ -58,36 +58,36 @@ public class LuaState {
     /**
      * a runtime error.
      */
-    final public static Integer LUA_ERRRUN = new Integer(2);
+    final public static int LUA_ERRRUN = 2;
     /**
      * syntax error during pre-compilation.
      */
-    final public static Integer LUA_ERRSYNTAX = new Integer(3);
+    final public static int LUA_ERRSYNTAX = 3;
     /**
      * memory allocation error. For such errors, Lua does not call
      * the error handler function.
      */
-    final public static Integer LUA_ERRMEM = new Integer(4);
+    final public static int LUA_ERRMEM = 4;
     /**
      * error while running the error handler function.
      */
-    final public static Integer LUA_ERRERR = new Integer(5);
+    final public static int LUA_ERRERR = 5;
     // Gargabe Collection Functions
-    final public static Integer LUA_GCSTOP = new Integer(0);
-    final public static Integer LUA_GCRESTART = new Integer(1);
-    final public static Integer LUA_GCCOLLECT = new Integer(2);
-    final public static Integer LUA_GCCOUNT = new Integer(3);
-    final public static Integer LUA_GCCOUNTB = new Integer(4);
-    final public static Integer LUA_GCSTEP = new Integer(5);
-    final public static Integer LUA_GCSETPAUSE = new Integer(6);
-    final public static Integer LUA_GCSETSTEPMUL = new Integer(7);
+    final public static int LUA_GCSTOP = 0;
+    final public static int LUA_GCRESTART = 1;
+    final public static int LUA_GCCOLLECT = 2;
+    final public static int LUA_GCCOUNT = 3;
+    final public static int LUA_GCCOUNTB = 4;
+    final public static int LUA_GCSTEP = 5;
+    final public static int LUA_GCSETPAUSE = 6;
+    final public static int LUA_GCSETSTEPMUL = 7;
     private final static String LUAJAVA_LIB = "luajava-1.1";
 
     /**
      * Opens the library containing the luajava API
      */
     static {
-        System.loadLibrary(LUAJAVA_LIB);
+//        System.loadLibrary(LUAJAVA_LIB);
     }
 
     private CPtr luaState;
@@ -128,36 +128,38 @@ public class LuaState {
      * @param retType type to convert to
      * @return The converted number
      */
-    public static Number convertLuaNumber(Double db, Class retType) {
+    public static Number convertLuaNumber(Double db, Class<?> retType) {
         // checks if retType is a primitive type
         if (retType.isPrimitive()) {
             if (retType == Integer.TYPE) {
-                return new Integer(db.intValue());
+                return db.intValue();
             } else if (retType == Long.TYPE) {
-                return new Long(db.longValue());
+                return db.longValue();
             } else if (retType == Float.TYPE) {
-                return new Float(db.floatValue());
+                return db.floatValue();
             } else if (retType == Double.TYPE) {
                 return db;
             } else if (retType == Byte.TYPE) {
-                return new Byte(db.byteValue());
+                return db.byteValue();
             } else if (retType == Short.TYPE) {
-                return new Short(db.shortValue());
+                return db.shortValue();
             }
-        } else if (retType.isAssignableFrom(Number.class)) {
+        }
+        // TODO isAssignableFrom 调用反了
+        else if (retType.isAssignableFrom(Number.class)) {
             // Checks all possibilities of number types
             if (retType.isAssignableFrom(Integer.class)) {
-                return new Integer(db.intValue());
+                return db.intValue();
             } else if (retType.isAssignableFrom(Long.class)) {
-                return new Long(db.longValue());
+                return db.longValue();
             } else if (retType.isAssignableFrom(Float.class)) {
-                return new Float(db.floatValue());
+                return db.floatValue();
             } else if (retType.isAssignableFrom(Double.class)) {
                 return db;
             } else if (retType.isAssignableFrom(Byte.class)) {
-                return new Byte(db.byteValue());
+                return db.byteValue();
             } else if (retType.isAssignableFrom(Short.class)) {
-                return new Short(db.shortValue());
+                return db.shortValue();
             }
         }
 
@@ -979,16 +981,16 @@ public class LuaState {
     public void pushObjectValue(Object obj) throws LuaException {
         if (obj == null) {
             pushNil();
-        } else if (obj instanceof Boolean bool) {
-            pushBoolean(bool.booleanValue());
+        } else if (obj instanceof Boolean) {
+            pushBoolean((Boolean) obj);
         } else if (obj instanceof Number) {
             pushNumber(((Number) obj).doubleValue());
         } else if (obj instanceof String) {
             pushString((String) obj);
-        } else if (obj instanceof JavaFunction func) {
-            pushJavaFunction(func);
-        } else if (obj instanceof LuaObject ref) {
-            ref.push();
+        } else if (obj instanceof JavaFunction) {
+            pushJavaFunction((JavaFunction) obj);
+        } else if (obj instanceof LuaObject) {
+            ((LuaObject) obj).push();
         } else if (obj instanceof byte[]) {
             pushString((byte[]) obj);
         } else if (obj.getClass().isArray()) {
@@ -1009,23 +1011,21 @@ public class LuaState {
         Object obj = null;
 
         if (isBoolean(idx)) {
-            obj = Boolean.valueOf(toBoolean(idx));
-        } else if (type(idx) == LuaState.LUA_TSTRING.intValue()) {
+            obj = toBoolean(idx);
+        } else if (type(idx) == LuaState.LUA_TSTRING) {
             obj = toString(idx);
         } else if (isFunction(idx)) {
             obj = getLuaObject(idx);
         } else if (isTable(idx)) {
             obj = getLuaObject(idx);
-        } else if (type(idx) == LuaState.LUA_TNUMBER.intValue()) {
-            obj = new Double(toNumber(idx));
+        } else if (type(idx) == LuaState.LUA_TNUMBER) {
+            obj = toNumber(idx);
         } else if (isUserdata(idx)) {
             if (isObject(idx)) {
                 obj = getObjectFromUserdata(idx);
             } else {
                 obj = getLuaObject(idx);
             }
-        } else if (isNil(idx)) {
-            obj = null;
         }
 
         return obj;
