@@ -15,7 +15,7 @@ model {
             sources {
                 c {
                     exportedHeaders {
-                        srcDir '/usr/include/luajit-2.1/'
+                        srcDir 'luajit/src'
                     }
                 }
             }
@@ -29,6 +29,7 @@ model {
                         srcDir project(':java').layout.buildDirectory.dir("include")
                         srcDir "${System.properties['java.home']}/include"
                         srcDir "${System.properties['java.home']}/include/linux"
+                        srcDir "${System.properties['java.home']}/include/win32"
                     }
                     source {
                         srcDir "src/main/c"
@@ -38,8 +39,25 @@ model {
             }
 
             binaries.withType(SharedLibraryBinarySpec) {
-                linker.args "-lluajit-5.1", "-L/usr/lib/"
+                def luajit_src = file('luajit/src')
+                linker.args "-lluajit", "-L${luajit_src}"
             }
         }
     }
 }
+
+tasks.register('buildLuaJIT') {
+    group("luajit")
+    if (!file('luajit').exists()) {
+        exec {
+            workingDir '.'
+            commandLine 'git', 'clone', 'https://luajit.org/git/luajit.git', 'luajit'
+        }
+    }
+    exec {
+        workingDir "luajit"
+        commandLine 'make'
+    }
+}
+
+tasks.findByName("model").dependsOn 'buildLuaJIT'
