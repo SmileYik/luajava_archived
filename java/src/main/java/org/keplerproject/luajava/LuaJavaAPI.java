@@ -536,24 +536,24 @@ public final class LuaJavaAPI {
                 if (parameter != Boolean.TYPE) {
                     okType = false;
                 }
-            } else if (!parameter.isAssignableFrom(Boolean.class)) {
+            } else if (!Boolean.class.isAssignableFrom(parameter)) {
                 okType = false;
             }
             obj = L.toBoolean(idx);
         } else if (L.type(idx) == LuaState.LUA_TSTRING) {
-            if (!parameter.isAssignableFrom(String.class)) {
+            if (!String.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.toString(idx);
             }
         } else if (L.isFunction(idx)) {
-            if (!parameter.isAssignableFrom(LuaObject.class)) {
+            if (!LuaObject.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.getLuaObject(idx);
             }
         } else if (L.isTable(idx)) {
-            if (!parameter.isAssignableFrom(LuaObject.class)) {
+            if (!LuaObject.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.getLuaObject(idx);
@@ -568,13 +568,13 @@ public final class LuaJavaAPI {
         } else if (L.isUserdata(idx)) {
             if (L.isObject(idx)) {
                 Object userObj = L.getObjectFromUserdata(idx);
-                if (!parameter.isAssignableFrom(userObj.getClass())) {
+                if (!userObj.getClass().isAssignableFrom(parameter)) {
                     okType = false;
                 } else {
                     obj = userObj;
                 }
             } else {
-                if (!parameter.isAssignableFrom(LuaObject.class)) {
+                if (!LuaObject.class.isAssignableFrom(parameter)) {
                     okType = false;
                 } else {
                     obj = L.getLuaObject(idx);

@@ -144,21 +144,19 @@ public class LuaState {
             } else if (retType == Short.TYPE) {
                 return db.shortValue();
             }
-        }
-        // TODO isAssignableFrom 调用反了
-        else if (retType.isAssignableFrom(Number.class)) {
+        } else if (Number.class.isAssignableFrom(retType)) {
             // Checks all possibilities of number types
-            if (retType.isAssignableFrom(Integer.class)) {
+            if (Integer.class.isAssignableFrom(retType)) {
                 return db.intValue();
-            } else if (retType.isAssignableFrom(Long.class)) {
+            } else if (Long.class.isAssignableFrom(retType)) {
                 return db.longValue();
-            } else if (retType.isAssignableFrom(Float.class)) {
+            } else if (Float.class.isAssignableFrom(retType)) {
                 return db.floatValue();
-            } else if (retType.isAssignableFrom(Double.class)) {
+            } else if (Double.class.isAssignableFrom(retType)) {
                 return db;
-            } else if (retType.isAssignableFrom(Byte.class)) {
+            } else if (Byte.class.isAssignableFrom(retType)) {
                 return db.byteValue();
-            } else if (retType.isAssignableFrom(Short.class)) {
+            } else if (Short.class.isAssignableFrom(retType)) {
                 return db.shortValue();
             }
         }
