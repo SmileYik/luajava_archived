@@ -61,3 +61,13 @@ tasks.register('buildLuaJIT') {
 }
 
 tasks.findByName("model").dependsOn 'buildLuaJIT'
+
+build {
+    doLast {
+        copy {
+            from layout.buildDirectory.file("libs/luajava/shared/libluajava.so")
+            from layout.projectDirectory.file("luajit/src/libluajit.so")
+            into rootProject.layout.buildDirectory.dir("outputs/shared")
+        }
+    }
+}

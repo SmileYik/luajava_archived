@@ -2,6 +2,7 @@ plugins {
     id 'java'
 }
 
+def baseName = 'luajava'
 group = 'org.keplerproject'
 version = '1.0-SNAPSHOT'
 
@@ -16,6 +17,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    archiveBaseName = baseName
+    from rootProject.layout.projectDirectory.file("License.txt")
+    doLast {
+        copy {
+            from layout.buildDirectory.file("libs/${baseName}-${version}.jar")
+            into rootProject.layout.buildDirectory.dir("outputs")
+        }
+    }
 }
 
 classes {
