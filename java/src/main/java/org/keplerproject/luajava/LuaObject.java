@@ -24,6 +24,7 @@
 
 package org.keplerproject.luajava;
 
+import java.io.Closeable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.StringTokenizer;
@@ -51,7 +52,7 @@ import java.util.StringTokenizer;
  * @author Rizzato
  * @author Thiago Ponte
  */
-public class LuaObject {
+public class LuaObject implements AutoCloseable, Closeable {
     protected Integer ref;
 
     protected final LuaState L;
@@ -174,7 +175,8 @@ public class LuaObject {
         }
     }
 
-    protected void finalize() {
+    @Override
+    public void close() {
         try {
             synchronized (L) {
                 if (L.getCPtrPeer() != 0)

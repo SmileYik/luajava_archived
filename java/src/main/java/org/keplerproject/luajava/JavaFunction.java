@@ -36,7 +36,7 @@ public abstract class JavaFunction {
     /**
      * This is the state in which this function will exist.
      */
-    protected LuaState L;
+    protected final LuaState L;
 
     /**
      * Constructor that receives a LuaState.

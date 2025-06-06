@@ -26,6 +26,8 @@ package org.keplerproject.luajava.test;
 import org.junit.jupiter.api.Test;
 import org.keplerproject.luajava.*;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -43,7 +45,7 @@ public class TestLuaMap {
     }
 
     @Test
-    public void testMap() throws ClassNotFoundException, LuaException {
+    public void testMap() throws ClassNotFoundException, LuaException, IOException {
         Map table = new HashMap();
         table.put("testTable2-1", "testTable2Value");
         table.put("testTable2-2", new Object());
@@ -69,6 +71,7 @@ public class TestLuaMap {
         luaMap.clear();
 
         assert Objects.equals(luaMap.size(), 0);
+        ((LuaMap) luaMap).close();
 
 
         // test using a lua table
@@ -129,7 +132,7 @@ public class TestLuaMap {
  *
  * @author thiago
  */
-class LuaMap implements Map {
+class LuaMap implements Map, AutoCloseable, Closeable {
     private final LuaState L;
     private LuaObject table;
 
@@ -144,8 +147,8 @@ class LuaMap implements Map {
         L.pop(1);
     }
 
-    protected void finalize() throws Throwable {
-        super.finalize();
+    @Override
+    public void close() throws IOException {
         L.close();
     }
 
