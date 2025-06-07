@@ -27,6 +27,7 @@ package org.keplerproject.luajava;
 import org.eu.smileyik.luajava.util.LuaType;
 
 import java.lang.reflect.*;
+import java.util.Optional;
 
 /**
  * Class that contains functions accessed by lua.
@@ -232,7 +233,11 @@ public final class LuaJavaAPI {
             }
 
             Class<?> type = field.getType();
-            Object setObj = compareTypes(L, type, 3);
+            Optional<Object> setObjRet = compareTypes(L, type, 3);
+            if (!setObjRet.isPresent()) {
+                throw new LuaException("Invalid type.");
+            }
+            Object setObj = setObjRet.get();
 
             if (field.isAccessible())
                 field.setAccessible(true);
@@ -272,7 +277,11 @@ public final class LuaJavaAPI {
                 throw new LuaException("Index out of bounds.");
 
             Class<?> type = obj.getClass().getComponentType();
-            Object setObj = compareTypes(L, type, 3);
+            Optional<Object> setObjRet = compareTypes(L, type, 3);
+            if (!setObjRet.isPresent()) {
+                throw new LuaException("Invalid type.");
+            }
+            Object setObj = setObjRet.get();
 
             Array.set(obj, index - 1, setObj);
         }
@@ -383,9 +392,10 @@ public final class LuaJavaAPI {
                 boolean okConstruc = true;
 
                 for (int j = 0; j < parameters.length; j++) {
-                    try {
-                        objs[j] = compareTypes(L, parameters[j], j + 2);
-                    } catch (Exception e) {
+                    Optional<Object> ret = compareTypes(L, parameters[j], j + 2);
+                    if (ret.isPresent()) {
+                        objs[j] = ret.get();
+                    } else {
                         okConstruc = false;
                         break;
                     }
@@ -528,14 +538,14 @@ public final class LuaJavaAPI {
         }
     }
 
-    private static Object compareTypes(LuaState L, Class<?> parameter, int idx)
+    private static Optional<Object> compareTypes(LuaState L, Class<?> parameter, int idx)
             throws LuaException {
         boolean okType = true;
         Object obj = null;
 
         // if parameter type is Object then just cast lua type to java type.
         if (parameter == Object.class) {
-            return L.toJavaObject(idx);
+            return Optional.of(L.toJavaObject(idx));
         }
 
         int luaType = L.type(idx);
@@ -592,13 +602,13 @@ public final class LuaJavaAPI {
             okType = false;
         }
 
-        if (!okType) {
-            throw new LuaException(String.format(
-                    "Invalid Parameter: expected %s, got %s", parameter, LuaType.typeName(luaType)
-            ));
-        }
+//        if (!okType) {
+//            throw new LuaException(String.format(
+//                    "Invalid Parameter: expected %s, got %s", parameter, LuaType.typeName(luaType)
+//            ));
+//        }
 
-        return obj;
+        return okType ? Optional.ofNullable(obj) : Optional.empty();
     }
 
     private static Method getMethod(LuaState L, Class<?> clazz, String methodName, Object[] retObjs, int top) {
@@ -620,9 +630,15 @@ public final class LuaJavaAPI {
             boolean okMethod = true;
 
             for (int j = 0; j < parameters.length; j++) {
+                Optional<Object> ret;
                 try {
-                    objs[j] = compareTypes(L, parameters[j], j + 2);
-                } catch (Exception e) {
+                    ret = compareTypes(L, parameters[j], j + 2);
+                } catch (LuaException e) {
+                    ret = Optional.empty();
+                }
+                if (ret.isPresent()) {
+                    objs[j] = ret.get();
+                } else {
                     okMethod = false;
                     break;
                 }
