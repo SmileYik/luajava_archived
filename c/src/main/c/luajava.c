@@ -446,9 +446,51 @@ static jclass    java_lang_class      = NULL;
 *$. **********************************************************************/
 
    static JNIEnv * getEnvFromState( lua_State * L );
+
+
+   /***************************************************************************
+*
+* $FC generateLuaStateStack
+* 
+* $ED Description
+*    generate current lua stack
+* 
+* $EP Function Parameters
+*    $P L - lua State
+*    $P stack_str - stack message
+* 
+* $FV Returned Value
+*    void
+* 
+*$. **********************************************************************/
+
+   static void generateLuaStateStack( lua_State * L , char * stack_str );
    
 
 /********************* Implementations ***************************/
+
+/***************************************************************************
+*
+*  Function: generateLuaStateStack
+*  ****/
+
+void generateLuaStateStack( lua_State * L , char * stack_str )
+{
+   lua_Debug ar;
+   int level = 0;
+   while (lua_getstack(L, level++, &ar)) {
+      lua_getinfo( L, "nSl", &ar );
+      sprintf(stack_str, "%s\n[Stack %d] [%s] %s: %s (%s#%d)", 
+         stack_str, level - 1,
+         ar.what ? ar.what : "(unknown what)",
+         ar.namewhat ? ar.namewhat : "(unknown namewhat)",
+         ar.name ? ar.name : "(unknown name)",
+         ar.source ? ar.source : "(unknown source)", 
+         ar.currentline
+      );
+   }
+}
+
 
 /***************************************************************************
 *
@@ -533,7 +575,10 @@ int objectIndex( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -665,7 +710,10 @@ int objectIndexReturn( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -766,7 +814,10 @@ int objectNewIndex( lua_State * L  )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -868,7 +919,10 @@ int classIndex( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -989,7 +1043,10 @@ int arrayIndex( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -1082,7 +1139,10 @@ int arrayNewIndex( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -1194,7 +1254,10 @@ int javaBindClass( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -1288,7 +1351,10 @@ int createProxy( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", cStr);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
@@ -1397,7 +1463,10 @@ int javaNew( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", str);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
@@ -1483,7 +1552,10 @@ int javaNewInstance( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", str);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
@@ -1584,7 +1656,10 @@ int javaLoadLib( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", str);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
@@ -1872,7 +1947,10 @@ int luaJavaFunctionCall( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char errorStack[1<<10] = "";
+      sprintf(errorStack, "%s", str);
+      generateLuaStateStack( L, errorStack);
+      lua_pushstring( L , errorStack );
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
