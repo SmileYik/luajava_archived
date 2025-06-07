@@ -24,6 +24,7 @@
 
 package org.keplerproject.luajava;
 
+import org.eu.smileyik.luajava.type.InnerTypeHelper;
 import org.eu.smileyik.luajava.util.ResourceCleaner;
 
 import java.lang.reflect.InvocationHandler;
@@ -88,93 +89,21 @@ public class LuaObject implements AutoCloseable {
     private final CleanTask cleanTask;
 
     /**
-     * Creates a reference to an object in the variable globalName
+     * Creates a reference to an object in the given index of the stack
+     * <strong>SHOULD NOT USE CONSTRUCTOR DIRECTLY</strong>
      *
      * @param L
-     * @param globalName
+     * @param index of the object on the lua stack
+     * @see LuaObject#create(LuaState, int)
      */
-    protected LuaObject(LuaState L, String globalName) {
+    protected LuaObject(LuaState L, int index) {
         synchronized (L) {
             this.L = L;
-            L.getGlobal(globalName);
-            registerValue(-1);
-            L.pop(1);
-            cleanTask = new CleanTask(L, ref);
-            CLEANER.register(this, cleanTask);
-        }
-    }
 
-    /**
-     * Creates a reference to an object inside another object
-     *
-     * @param parent The Lua Table or Userdata that contains the Field.
-     * @param name   The name that index the field
-     */
-    protected LuaObject(LuaObject parent, String name) throws LuaException {
-        synchronized (parent.getLuaState()) {
-            this.L = parent.getLuaState();
+            // Creates the reference to the object in the registry table
+            L.pushValue(index);
+            ref = L.Lref(LuaState.LUA_REGISTRYINDEX);
 
-            if (!parent.isTable() && !parent.isUserdata()) {
-                throw new LuaException("Object parent should be a table or userdata .");
-            }
-
-            parent.push();
-            L.pushString(name);
-            L.getTable(-2);
-            L.remove(-2);
-            registerValue(-1);
-            L.pop(1);
-            cleanTask = new CleanTask(L, ref);
-            CLEANER.register(this, cleanTask);
-        }
-    }
-
-    /**
-     * This constructor creates a LuaObject from a table that is indexed by a number.
-     *
-     * @param parent The Lua Table or Userdata that contains the Field.
-     * @param name   The name (number) that index the field
-     * @throws LuaException When the parent object isn't a Table or Userdata
-     */
-    protected LuaObject(LuaObject parent, Number name) throws LuaException {
-        synchronized (parent.getLuaState()) {
-            this.L = parent.getLuaState();
-            if (!parent.isTable() && !parent.isUserdata())
-                throw new LuaException("Object parent should be a table or userdata .");
-
-            parent.push();
-            L.pushNumber(name.doubleValue());
-            L.getTable(-2);
-            L.remove(-2);
-            registerValue(-1);
-            L.pop(1);
-            cleanTask = new CleanTask(L, ref);
-            CLEANER.register(this, cleanTask);
-        }
-    }
-
-    /**
-     * This constructor creates a LuaObject from a table that is indexed by a LuaObject.
-     *
-     * @param parent The Lua Table or Userdata that contains the Field.
-     * @param name   The name (LuaObject) that index the field
-     * @throws LuaException When the parent object isn't a Table or Userdata
-     */
-    protected LuaObject(LuaObject parent, LuaObject name) throws LuaException {
-        if (parent.getLuaState() != name.getLuaState())
-            throw new LuaException("LuaStates must be the same!");
-        synchronized (parent.getLuaState()) {
-            if (!parent.isTable() && !parent.isUserdata())
-                throw new LuaException("Object parent should be a table or userdata .");
-
-            this.L = parent.getLuaState();
-
-            parent.push();
-            name.push();
-            L.getTable(-2);
-            L.remove(-2);
-            registerValue(-1);
-            L.pop(1);
             cleanTask = new CleanTask(L, ref);
             CLEANER.register(this, cleanTask);
         }
@@ -186,13 +115,101 @@ public class LuaObject implements AutoCloseable {
      * @param L
      * @param index of the object on the lua stack
      */
-    protected LuaObject(LuaState L, int index) {
+    protected static LuaObject create(LuaState L, int index) {
         synchronized (L) {
-            this.L = L;
+            return InnerTypeHelper.createLuaObject(L, index)
+                    .orElseGet(() -> new LuaObject(L, index));
+        }
+    }
 
-            registerValue(index);
-            cleanTask = new CleanTask(L, ref);
-            CLEANER.register(this, cleanTask);
+    /**
+     * Creates a reference to an object in the variable globalName
+     *
+     * @param L
+     * @param globalName
+     */
+    protected static LuaObject create(LuaState L, String globalName) {
+        synchronized (L) {
+            L.getGlobal(globalName);
+            LuaObject luaObject = create(L, -1);
+            L.pop(1);
+            return luaObject;
+        }
+    }
+
+    /**
+     * Creates a reference to an object inside another object
+     *
+     * @param parent The Lua Table or Userdata that contains the Field.
+     * @param name   The name that index the field
+     */
+    protected static LuaObject create(LuaObject parent, String name) throws LuaException {
+        synchronized (parent.getLuaState()) {
+            LuaState L = parent.getLuaState();
+
+            if (!parent.isTable() && !parent.isUserdata()) {
+                throw new LuaException("Object parent should be a table or userdata .");
+            }
+
+            parent.push();
+            L.pushString(name);
+            L.getTable(-2);
+            L.remove(-2);
+            LuaObject luaObject = create(L, -1);
+            L.pop(1);
+            return luaObject;
+        }
+    }
+
+    /**
+     * This static method creates a LuaObject from a table that is indexed by a number.
+     *
+     * @param parent The Lua Table or Userdata that contains the Field.
+     * @param name   The name (number) that index the field
+     * @throws LuaException When the parent object isn't a Table or Userdata
+     */
+    protected static LuaObject create(LuaObject parent, Number name) throws LuaException {
+        synchronized (parent.getLuaState()) {
+            LuaState L = parent.getLuaState();
+            if (!parent.isTable() && !parent.isUserdata())
+                throw new LuaException("Object parent should be a table or userdata .");
+
+            parent.push();
+            L.pushNumber(name.doubleValue());
+            L.getTable(-2);
+            L.remove(-2);
+            LuaObject luaObject = create(L, -1);
+            L.pop(1);
+            return luaObject;
+        }
+    }
+
+    /**
+     * This static method creates a LuaObject from a table that is indexed by a LuaObject.
+     *
+     * @param parent The Lua Table or Userdata that contains the Field.
+     * @param name   The name (LuaObject) that index the field
+     * @throws LuaException When the parent object isn't a Table or Userdata
+     */
+    protected static LuaObject create(LuaObject parent, LuaObject name) throws LuaException {
+        if (parent.getLuaState() != name.getLuaState())
+            throw new LuaException("LuaStates must be the same!");
+        synchronized (parent.getLuaState()) {
+            if (!parent.isTable() && !parent.isUserdata())
+                throw new LuaException("Object parent should be a table or userdata .");
+
+            LuaState L = parent.getLuaState();
+
+            parent.push();
+            name.push();
+            L.getTable(-2);
+            L.remove(-2);
+
+
+
+            LuaObject luaObject = create(L, -1);
+            L.pop(1);
+            return luaObject;
         }
     }
 
@@ -201,18 +218,6 @@ public class LuaObject implements AutoCloseable {
      */
     public LuaState getLuaState() {
         return L;
-    }
-
-    /**
-     * Creates the reference to the object in the registry table
-     *
-     * @param index of the object on the lua stack
-     */
-    private void registerValue(int index) {
-        synchronized (L) {
-            L.pushValue(index);
-            ref = L.Lref(LuaState.LUA_REGISTRYINDEX);
-        }
     }
 
     @Override

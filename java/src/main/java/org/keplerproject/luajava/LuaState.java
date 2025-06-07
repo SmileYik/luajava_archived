@@ -1037,7 +1037,7 @@ public class LuaState implements AutoCloseable {
      * @return LuaObject
      */
     public LuaObject getLuaObject(String globalName) {
-        return new LuaObject(this, globalName);
+        return LuaObject.create(this, globalName);
     }
 
     /**
@@ -1053,7 +1053,7 @@ public class LuaState implements AutoCloseable {
         if (parent.L.getCPtrPeer() != luaState.getPeer())
             throw new LuaException("Object must have the same LuaState as the parent!");
 
-        return new LuaObject(parent, name);
+        return LuaObject.create(parent, name);
     }
 
     /**
@@ -1069,7 +1069,7 @@ public class LuaState implements AutoCloseable {
         if (parent.L.getCPtrPeer() != luaState.getPeer())
             throw new LuaException("Object must have the same LuaState as the parent!");
 
-        return new LuaObject(parent, name);
+        return LuaObject.create(parent, name);
     }
 
     /**
@@ -1086,7 +1086,7 @@ public class LuaState implements AutoCloseable {
                 parent.getLuaState().getCPtrPeer() != name.getLuaState().getCPtrPeer())
             throw new LuaException("Object must have the same LuaState as the parent!");
 
-        return new LuaObject(parent, name);
+        return LuaObject.create(parent, name);
     }
 
     /**
@@ -1097,6 +1097,6 @@ public class LuaState implements AutoCloseable {
      * @return LuaObject
      */
     public LuaObject getLuaObject(int index) {
-        return new LuaObject(this, index);
+        return LuaObject.create(this, index);
     }
 }

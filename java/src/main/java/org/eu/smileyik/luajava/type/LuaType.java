@@ -1,4 +1,4 @@
-package org.eu.smileyik.luajava.util;
+package org.eu.smileyik.luajava.type;
 
 import org.keplerproject.luajava.LuaState;
 
@@ -17,18 +17,20 @@ public class LuaType {
     final public static int USERDATA = LuaState.LUA_TUSERDATA;
     final public static int THREAD = LuaState.LUA_TTHREAD;
 
+    final public static String NIL_NAME = "[Lua NIL]";
+
     private static final Map<Integer, String> LUA_TYPE_NAME_MAP = new HashMap<Integer, String>() {
         {
-            put(NONE, "Lua None");
-            put(NIL, "Lua NIL");
-            put(BOOLEAN, "Lua Boolean");
-            put(LIGHT_USERDATA, "Lua LightUserData");
-            put(NUMBER, "Lua Number");
-            put(STRING, "Lua String");
-            put(TABLE, "Lua Table");
-            put(FUNCTION, "Lua Function");
-            put(USERDATA, "Lua UserData");
-            put(THREAD, "Lua Thread");
+            put(NONE, "[Lua None]");
+            put(NIL, NIL_NAME);
+            put(BOOLEAN, "[Lua Boolean]");
+            put(LIGHT_USERDATA, "[Lua LightUserData]");
+            put(NUMBER, "[Lua Number]");
+            put(STRING, "[Lua String]");
+            put(TABLE, "[Lua Table]");
+            put(FUNCTION, "[Lua Function]");
+            put(USERDATA, "[Lua UserData]");
+            put(THREAD, "[Lua Thread]");
         }
     };
 
