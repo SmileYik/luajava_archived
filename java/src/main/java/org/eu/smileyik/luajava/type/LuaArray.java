@@ -33,6 +33,92 @@ public class LuaArray extends LuaTable {
         }
     }
 
+    public byte[] toByteArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            bytes[i] = number.byteValue();
+        }
+        return bytes;
+    }
+
+    public short[] toShortArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        short[] shorts = new short[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            shorts[i] = number.shortValue();
+        }
+        return shorts;
+    }
+
+    public int[] toIntArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        int[] nums = new int[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            nums[i] = number.intValue();
+        }
+        return nums;
+    }
+
+    public long[] toLongArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        long[] longs = new long[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            longs[i] = number.longValue();
+        }
+        return longs;
+    }
+
+    public float[] toFloatArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        float[] floats = new float[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            floats[i] = number.floatValue();
+        }
+        return floats;
+    }
+
+    public boolean[] toBooleanArray() throws Throwable {
+        List<Boolean> list = asList(Boolean.class);
+        int len = list.size();
+        boolean[] bool = new boolean[len];
+        for (int i = 0; i < len; i++) {
+            bool[i] = list.get(i);;
+        }
+        return bool;
+    }
+
+    public char[] toCharArray() throws Throwable {
+        List<Character> list = asList(Character.class);
+        int len = list.size();
+        char[] chars = new char[len];
+        for (int i = 0; i < len; i++) {
+            chars[i] = list.get(i);
+        }
+        return chars;
+    }
+
+    public double[] toDoubleArray() throws Throwable {
+        List<Number> list = asList(Number.class);
+        int len = list.size();
+        double[] doubles = new double[len];
+        for (int i = 0; i < len; i++) {
+            Number number = list.get(i);
+            doubles[i] = number.doubleValue();
+        }
+        return doubles;
+    }
+
     public List<Object> asList() throws Throwable {
         return asList(Object.class);
     }
