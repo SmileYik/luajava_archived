@@ -19,7 +19,7 @@ public class InnerTypeHelper {
             case LuaType.FUNCTION:
                 return Optional.of(new LuaFunction(l, idx));
             case LuaType.TABLE:
-                return Optional.of(new LuaTable(l, idx));
+                return Optional.of(LuaTable.create(l, idx));
             case LuaType.BOOLEAN:
                 return Optional.of(new LuaBoolean(l, idx));
             case LuaType.NUMBER:
