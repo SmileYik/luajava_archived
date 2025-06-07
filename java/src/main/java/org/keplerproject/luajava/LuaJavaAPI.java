@@ -24,8 +24,6 @@
 
 package org.keplerproject.luajava;
 
-import org.eu.smileyik.luajava.util.LuaType;
-
 import java.lang.reflect.*;
 import java.util.Optional;
 
@@ -61,55 +59,10 @@ public final class LuaJavaAPI {
 
             if (obj instanceof Class) {
                 clazz = (Class<?>) obj;
-                // First try. Static methods of the object
-                method = getMethod(L, clazz, methodName, objs, top);
-
-                if (method == null)
-                    clazz = Class.class;
-
-                // Second try. Methods of the Class class
-                method = getMethod(L, clazz, methodName, objs, top);
             } else {
                 clazz = obj.getClass();
-                method = getMethod(L, clazz, methodName, objs, top);
             }
-      
-/*      Method[] methods = clazz.getMethods();
-      Method method = null;
-
-      // gets method and arguments
-      for (int i = 0; i < methods.length; i++)
-      {
-        if (!methods[i].getName().equals(methodName))
-
-          continue;
-
-        Class[] parameters = methods[i].getParameterTypes();
-        if (parameters.length != top - 1)
-          continue;
-
-        boolean okMethod = true;
-
-        for (int j = 0; j < parameters.length; j++)
-        {
-          try
-          {
-            objs[j] = compareTypes(L, parameters[j], j + 2);
-          }
-          catch (Exception e)
-          {
-            okMethod = false;
-            break;
-          }
-        }
-
-        if (okMethod)
-        {
-          method = methods[i];
-          break;
-        }
-
-      }*/
+            method = findMethod(L, clazz, methodName, objs, top);
 
             // If method is null means there isn't one receiving the given arguments
             if (method == null) {
@@ -207,7 +160,7 @@ public final class LuaJavaAPI {
      * Java function to be called when a java object metamethod __newindex is called.
      *
      * @param luaState  int that represents the state to be used
-     * @param object    to be used
+     * @param obj       to be used
      * @param fieldName name of the field to be set
      * @return number of returned objects
      * @throws LuaException
@@ -259,7 +212,7 @@ public final class LuaJavaAPI {
      * Java function to be called when a java array metamethod __newindex is called.
      *
      * @param luaState int that represents the state to be used
-     * @param object   to be used
+     * @param obj      to be used
      * @param index    index number of array. Since Lua index starts from 1,
      *                 the number used will be (index - 1)
      * @return number of returned objects
@@ -609,6 +562,46 @@ public final class LuaJavaAPI {
 //        }
 
         return okType ? Optional.ofNullable(obj) : Optional.empty();
+    }
+
+    private static Method findMethod(LuaState L, Class<?> clazz, String methodName, Object[] retObjs, int top) {
+        Class<?> c = clazz;
+        Object[] objs = new Object[top - 1];
+        int paramsCount = top - 1;
+        Method mached = null;
+
+        while (c != null) {
+            for (Method method : c.getDeclaredMethods()) {
+                if (!method.getName().equals(methodName) || method.getParameterCount() != paramsCount) {
+                    continue;
+                }
+                mached = method;
+                Class<?>[] parameters = method.getParameterTypes();
+                for (int i = 0; i < paramsCount; i++) {
+                    Class<?> paramType = parameters[i];
+                    Optional<Object> ret;
+                    try {
+                        ret = compareTypes(L, paramType, i + 2);
+                    } catch (LuaException e) {
+                        ret = Optional.empty();
+                    }
+                    if (ret.isPresent()) {
+                        objs[i] = ret.get();
+                    } else {
+                        mached = null;
+                        break;
+                    }
+                }
+                if (mached != null) {
+                    System.arraycopy(objs, 0, retObjs, 0, objs.length);
+                    return method;
+                }
+
+            }
+            c = c.getSuperclass();
+        }
+
+        return null;
     }
 
     private static Method getMethod(LuaState L, Class<?> clazz, String methodName, Object[] retObjs, int top) {
