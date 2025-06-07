@@ -32,7 +32,7 @@ package org.keplerproject.luajava;
  *
  * @author Thiago Ponte
  */
-public class LuaState {
+public class LuaState implements AutoCloseable {
     final public static int LUA_GLOBALSINDEX = -10002;
     final public static int LUA_REGISTRYINDEX = -10000;
     final public static int LUA_TNONE = -1;

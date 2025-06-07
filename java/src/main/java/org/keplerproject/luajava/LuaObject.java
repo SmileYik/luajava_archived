@@ -24,10 +24,12 @@
 
 package org.keplerproject.luajava;
 
-import java.io.Closeable;
+import org.eu.smileyik.luajava.util.ResourceCleaner;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class represents a Lua object of any type. A LuaObject is constructed by a {@link LuaState} object using one of
@@ -52,10 +54,38 @@ import java.util.StringTokenizer;
  * @author Rizzato
  * @author Thiago Ponte
  */
-public class LuaObject implements AutoCloseable, Closeable {
+public class LuaObject implements AutoCloseable {
+    protected static final ResourceCleaner CLEANER = new ResourceCleaner();
+    private static final class CleanTask implements Runnable {
+        private final LuaState L;
+        private final Integer ref;
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+
+        private CleanTask(LuaState l, Integer ref) {
+            L = l;
+            this.ref = ref;
+        }
+
+        @Override
+        public void run() {
+            if (!closed.compareAndSet(false, true)) {
+                return;
+            }
+            try {
+                synchronized (L) {
+                    if (L.getCPtrPeer() != 0)
+                        L.LunRef(LuaState.LUA_REGISTRYINDEX, ref);
+                }
+            } catch (Exception e) {
+                System.err.println("Unable to release object " + ref);
+            }
+        }
+    }
+
     protected Integer ref;
 
     protected final LuaState L;
+    private final CleanTask cleanTask;
 
     /**
      * Creates a reference to an object in the variable globalName
@@ -69,6 +99,8 @@ public class LuaObject implements AutoCloseable, Closeable {
             L.getGlobal(globalName);
             registerValue(-1);
             L.pop(1);
+            cleanTask = new CleanTask(L, ref);
+            CLEANER.register(this, cleanTask);
         }
     }
 
@@ -92,6 +124,8 @@ public class LuaObject implements AutoCloseable, Closeable {
             L.remove(-2);
             registerValue(-1);
             L.pop(1);
+            cleanTask = new CleanTask(L, ref);
+            CLEANER.register(this, cleanTask);
         }
     }
 
@@ -114,6 +148,8 @@ public class LuaObject implements AutoCloseable, Closeable {
             L.remove(-2);
             registerValue(-1);
             L.pop(1);
+            cleanTask = new CleanTask(L, ref);
+            CLEANER.register(this, cleanTask);
         }
     }
 
@@ -139,6 +175,8 @@ public class LuaObject implements AutoCloseable, Closeable {
             L.remove(-2);
             registerValue(-1);
             L.pop(1);
+            cleanTask = new CleanTask(L, ref);
+            CLEANER.register(this, cleanTask);
         }
     }
 
@@ -153,6 +191,8 @@ public class LuaObject implements AutoCloseable, Closeable {
             this.L = L;
 
             registerValue(index);
+            cleanTask = new CleanTask(L, ref);
+            CLEANER.register(this, cleanTask);
         }
     }
 
@@ -177,14 +217,7 @@ public class LuaObject implements AutoCloseable, Closeable {
 
     @Override
     public void close() {
-        try {
-            synchronized (L) {
-                if (L.getCPtrPeer() != 0)
-                    L.LunRef(LuaState.LUA_REGISTRYINDEX, ref);
-            }
-        } catch (Exception e) {
-            System.err.println("Unable to release object " + ref);
-        }
+        cleanTask.run();
     }
 
     /**
