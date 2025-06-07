@@ -164,9 +164,13 @@ class LuaArrayTest {
         array = (LuaArray) L.getLuaObject("nums");
         assert Arrays.equals(array.asArray(Number.class), new Number[] {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
         assert Arrays.equals(array.asArray(Double.class), new Number[] {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        assert Arrays.equals(array.toDoubleArray(), new double[] {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        assert Arrays.equals(array.toFloatArray(), new float[] {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f});
+        assert Arrays.equals(array.toLongArray(), new long[] {1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L});
 
         array = (LuaArray) L.getLuaObject("bools");
         assert Arrays.equals(array.asArray(Boolean.class), new Boolean[]{true, false, true, false});
+        assert Arrays.equals(array.toBooleanArray(), new boolean[]{true, false, true, false});
 
         array = (LuaArray) L.getLuaObject("funcs");
         System.out.println(Arrays.toString(array.asArray(LuaFunction.class)));
