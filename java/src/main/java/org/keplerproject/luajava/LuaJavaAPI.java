@@ -24,6 +24,8 @@
 
 package org.keplerproject.luajava;
 
+import org.eu.smileyik.luajava.util.LuaType;
+
 import java.lang.reflect.*;
 
 /**
@@ -530,28 +532,33 @@ public final class LuaJavaAPI {
             throws LuaException {
         boolean okType = true;
         Object obj = null;
-        int luaType = L.type(idx);
 
+        // if parameter type is Object then just cast lua type to java type.
+        if (parameter == Object.class) {
+            return L.toJavaObject(idx);
+        }
+
+        int luaType = L.type(idx);
         if (luaType == LuaState.LUA_TBOOLEAN) {
-            if (parameter.isPrimitive()) {
-                if (parameter != Boolean.TYPE) {
-                    okType = false;
-                }
-            } else if (!Boolean.class.isAssignableFrom(parameter)) {
+            if (
+                    parameter.isPrimitive() && parameter == Boolean.TYPE ||
+                            Boolean.class.isAssignableFrom(parameter)
+            ) {
+                obj = L.toBoolean(idx);
+            } else {
                 okType = false;
             }
-            obj = L.toBoolean(idx);
         } else if (luaType == LuaState.LUA_TSTRING) {
-            if (!String.class.isAssignableFrom(parameter)) {
-                okType = false;
-            } else {
+            if (String.class.isAssignableFrom(parameter)) {
                 obj = L.toString(idx);
+            } else {
+                okType = false;
             }
         } else if (luaType == LuaState.LUA_TFUNCTION) {
-            if (!LuaObject.class.isAssignableFrom(parameter)) {
-                okType = false;
-            } else {
+            if (LuaObject.class.isAssignableFrom(parameter)) {
                 obj = L.getLuaObject(idx);
+            } else {
+                okType = false;
             }
         } else if (luaType == LuaState.LUA_TTABLE) {
             if (!LuaObject.class.isAssignableFrom(parameter)) {
@@ -569,16 +576,16 @@ public final class LuaJavaAPI {
         } else if (luaType == LuaState.LUA_TUSERDATA) {
             if (L.isObject(idx)) {
                 Object userObj = L.getObjectFromUserdata(idx);
-                if (!userObj.getClass().isAssignableFrom(parameter)) {
-                    okType = false;
-                } else {
+                if (userObj.getClass().isAssignableFrom(parameter)) {
                     obj = userObj;
+                } else {
+                    okType = false;
                 }
             } else {
-                if (!LuaObject.class.isAssignableFrom(parameter)) {
-                    okType = false;
-                } else {
+                if (LuaObject.class.isAssignableFrom(parameter)) {
                     obj = L.getLuaObject(idx);
+                } else {
+                    okType = false;
                 }
             }
         } else if (luaType != LuaState.LUA_TNIL) {
@@ -586,7 +593,9 @@ public final class LuaJavaAPI {
         }
 
         if (!okType) {
-            throw new LuaException("Invalid Parameter.");
+            throw new LuaException(String.format(
+                    "Invalid Parameter: expected %s, got %s", parameter, LuaType.typeName(luaType)
+            ));
         }
 
         return obj;
