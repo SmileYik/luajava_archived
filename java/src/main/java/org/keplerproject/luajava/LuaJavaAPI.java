@@ -530,8 +530,9 @@ public final class LuaJavaAPI {
             throws LuaException {
         boolean okType = true;
         Object obj = null;
+        int luaType = L.type(idx);
 
-        if (L.isBoolean(idx)) {
+        if (luaType == LuaState.LUA_TBOOLEAN) {
             if (parameter.isPrimitive()) {
                 if (parameter != Boolean.TYPE) {
                     okType = false;
@@ -540,32 +541,32 @@ public final class LuaJavaAPI {
                 okType = false;
             }
             obj = L.toBoolean(idx);
-        } else if (L.type(idx) == LuaState.LUA_TSTRING) {
+        } else if (luaType == LuaState.LUA_TSTRING) {
             if (!String.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.toString(idx);
             }
-        } else if (L.isFunction(idx)) {
+        } else if (luaType == LuaState.LUA_TFUNCTION) {
             if (!LuaObject.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.getLuaObject(idx);
             }
-        } else if (L.isTable(idx)) {
+        } else if (luaType == LuaState.LUA_TTABLE) {
             if (!LuaObject.class.isAssignableFrom(parameter)) {
                 okType = false;
             } else {
                 obj = L.getLuaObject(idx);
             }
-        } else if (L.type(idx) == LuaState.LUA_TNUMBER) {
+        } else if (luaType == LuaState.LUA_TNUMBER) {
             Double db = L.toNumber(idx);
 
             obj = LuaState.convertLuaNumber(db, parameter);
             if (obj == null) {
                 okType = false;
             }
-        } else if (L.isUserdata(idx)) {
+        } else if (luaType == LuaState.LUA_TUSERDATA) {
             if (L.isObject(idx)) {
                 Object userObj = L.getObjectFromUserdata(idx);
                 if (!userObj.getClass().isAssignableFrom(parameter)) {
@@ -580,10 +581,8 @@ public final class LuaJavaAPI {
                     obj = L.getLuaObject(idx);
                 }
             }
-        } else if (L.isNil(idx)) {
-            obj = null;
-        } else {
-            throw new LuaException("Invalid Parameters.");
+        } else if (luaType != LuaState.LUA_TNIL) {
+            okType = false;
         }
 
         if (!okType) {

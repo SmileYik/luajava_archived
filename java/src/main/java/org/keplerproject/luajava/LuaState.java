@@ -1007,23 +1007,24 @@ public class LuaState implements AutoCloseable {
      */
     public synchronized Object toJavaObject(int idx) throws LuaException {
         Object obj = null;
-
-        if (isBoolean(idx)) {
-            obj = toBoolean(idx);
-        } else if (type(idx) == LuaState.LUA_TSTRING) {
-            obj = toString(idx);
-        } else if (isFunction(idx)) {
-            obj = getLuaObject(idx);
-        } else if (isTable(idx)) {
-            obj = getLuaObject(idx);
-        } else if (type(idx) == LuaState.LUA_TNUMBER) {
-            obj = toNumber(idx);
-        } else if (isUserdata(idx)) {
-            if (isObject(idx)) {
-                obj = getObjectFromUserdata(idx);
-            } else {
+        int type = type(idx);
+        switch (type) {
+            case LUA_TBOOLEAN:
+                obj = toBoolean(idx);
+                break;
+            case LUA_TSTRING:
+                obj = toString(idx);
+                break;
+            case LUA_TFUNCTION:
+            case LUA_TTABLE:
                 obj = getLuaObject(idx);
-            }
+                break;
+            case LUA_TNUMBER:
+                obj = toNumber(idx);
+                break;
+            case LUA_TUSERDATA:
+                obj = isObject(idx) ? getObjectFromUserdata(idx) : getLuaObject(idx);
+                break;
         }
 
         return obj;
