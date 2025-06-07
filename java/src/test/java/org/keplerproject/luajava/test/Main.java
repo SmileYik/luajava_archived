@@ -23,6 +23,7 @@
 
 package org.keplerproject.luajava.test;
 
+import org.junit.jupiter.api.Test;
 import org.keplerproject.luajava.*;
 
 
@@ -40,7 +41,8 @@ public class Main {
             "luaPrint={implements='org.keplerproject.luajava.test.Printable', print=function(str)print('Printing from lua :'..str)end  }";
 
 
-    public static void main(String[] main_args) throws LuaException, ClassNotFoundException {
+    @Test
+    public void test() throws LuaException, ClassNotFoundException {
         LuaState L = LuaStateFactory.newLuaState();
         L.openBase();
 

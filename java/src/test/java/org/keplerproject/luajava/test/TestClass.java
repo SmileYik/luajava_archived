@@ -24,6 +24,7 @@
 
 package org.keplerproject.luajava.test;
 
+import org.junit.jupiter.api.Test;
 import org.keplerproject.luajava.*;
 
 public class TestClass {
@@ -32,27 +33,12 @@ public class TestClass {
         LoadLibrary.load();
     }
 
-    public final LuaState Lf;
-
-    public JavaFunction jf;
-
-    public TestClass(LuaState L) {
-        this.Lf = L;
-
-        jf = new JavaFunction(L) {
-            public int execute() {
-                this.L.pushString("Returned String");
-                System.out.println("Printing from Java Function");
-                return 1;
-            }
-        };
-    }
-
-    public static void main(String[] args) throws LuaException {
+    @Test
+    public void test() throws LuaException {
         LuaState L = LuaStateFactory.newLuaState();
         L.openBase();
 
-        TestClass test = new TestClass(L);
+        TestClassInner test = new TestClassInner(L);
 
         test.jf.register("javaFuncTest");
 
@@ -61,4 +47,22 @@ public class TestClass {
         L.close();
     }
 
+
+    public static class TestClassInner {
+        public final LuaState Lf;
+
+        public JavaFunction jf;
+
+        public TestClassInner(LuaState L) {
+            this.Lf = L;
+
+            jf = new JavaFunction(L) {
+                public int execute() {
+                    this.L.pushString("Returned String");
+                    System.out.println("Printing from Java Function");
+                    return 1;
+                }
+            };
+        }
+    }
 }
