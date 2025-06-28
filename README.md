@@ -1,3 +1,5 @@
+This repo is archived, please go to my luajava repo: https://github.com/SmileYik/luajava
+
 luajava
 =======
 
